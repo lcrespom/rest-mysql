@@ -1,34 +1,17 @@
 var express = require('express');
 var bodyParser = require('body-parser');
-var mysql = require('mysql');
+var db = require('./db');
 var mysqlConfig = require('./mysql-config.json');
 
-var dbconn = createDBConnection();
+var dbconn = db.setup(mysqlConfig);
 var app = createApp();
 var port = process.env.PORT || 1337;
 var router = createRouter();
-addTableRoute(router, 'test', 'test2');
+addTableRoute(router, '/test', 'test2');
 app.use('/api', router);	// all of our routes will be prefixed with /api
 app.listen(port);			// Start server
 console.log('API server ready on port ' + port);
 
-
-//-------------------- DB -------------------- 
-function createDBConnection() {
-	console.log("DB: creating connection...")
-	var dbconn = mysql.createConnection(mysqlConfig);
-	dbconn.connect(function(err) {
-		if (err) {
-			console.error('Error connecting to DB:');
-			console.error(err);
-			throw new Error('Error connecting to DB');
-		}
-		else {
-			console.log('connected to MYSQL');
-		}
-	});
-	return dbconn;
-}
 
 //-------------------- App setup  --------------------
 function createApp() {
@@ -57,9 +40,10 @@ function createRouter() {
 	return router;
 }
 
-function addTableRoute(router, route, table) {
-	router.route('/test')
+function addTableRoute(router, url, table) {
+	thandler = db.getCrudHandler(dbconn, table);
+	router.route(url)
 	.get((req, res) => {
-		res.json({ message: 'TODO: reply table content' });   
+		thandler.find(req.params, items => res.json({ items }));
 	});
 }
