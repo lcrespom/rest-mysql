@@ -45,5 +45,16 @@ function addTableRoute(router, url, table) {
 	router.route(url)
 	.get((req, res) => {
 		thandler.find(req.params, items => res.json({ items }));
+	})
+	.post((req, res) => {
+		thandler.create(req.body, result => {
+			result.self = fullLink(url + '/' + result.id);
+			res.json(result);
+		});
 	});
+}
+
+function fullLink(link) {
+	//TODO compose full link
+	return 'http://host:port/api' + link;
 }

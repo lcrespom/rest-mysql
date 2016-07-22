@@ -21,8 +21,16 @@ function getCrudHandler(conn, tableName) {
 	return {
 		find: (params, cb) => {
 			conn.query('SELECT * FROM ' + tableName, (err, rows, fields) => {
+				//TODO errors should be passed to callback
 				if (err) throw err;
 				cb(rows);
+			});
+		},
+		create: (params, cb) => {
+			conn.query(`INSERT INTO ${tableName} SET ?`, params, (err, result) => {
+				//TODO errors should be passed to callback
+				if (err) throw err;
+				cb({ id: result.insertId });
 			});
 		}
 	}
