@@ -54,7 +54,7 @@ function getCrudHandler(conn, tableName) {
 		},
 		delete: (id, cb) => {
 			var sql = `DELETE FROM ${tableName} WHERE id=?`;
-			conn.query(sql, [params, id], (err, result) => {
+			conn.query(sql, [id], (err, result) => {
 				//TODO errors should be passed to callback
 				if (err) throw err;
 				cb({ deleted: true });
