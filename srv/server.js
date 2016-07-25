@@ -79,13 +79,19 @@ function addTableRoute(router, url, table) {
 			thandler.update(req.params.id, req.body, (err, result) => {
 				//TODO validate req.body to be non-empty
 				if (err) return handleError(err, res);
-				res.json({ updated: true });
+				if (result.changedRows > 0)
+					res.json({ updated: true });
+				else
+					respondNotFound(req, res, url, req.params.id);
 			});
 		})
 		.delete((req, res) => {
 			thandler.delete(req.params.id, (err, result) => {
 				if (err) return handleError(err, res);
-				res.json({ deleted: true });
+				if (result.changedRows > 0)
+					res.json({ deleted: true });
+				else
+					respondNotFound(req, res, url, req.params.id);
 			});
 		});
 }
@@ -101,5 +107,12 @@ function handleError(err, res) {
 	res.status(400)
 	.json({
 		message: 'Bad Request'
+	});
+}
+
+function respondNotFound(req, res, url, id) {
+	res.status(404)
+	.json({
+		message: `Item ${fullLink(req, url, id)} not found`
 	});
 }
