@@ -21,44 +21,23 @@ function getCrudHandler(conn, tableName) {
 	return {
 		find: (params, cb) => {
 			var sql = `SELECT * FROM ${tableName}`;
-			conn.query(sql, (err, rows, fields) => {
-				//TODO errors should be passed to callback
-				if (err) throw err;
-				cb(rows);
-			});
+			conn.query(sql, cb);
 		},
 		byId: (id, cb) => {
 			var sql = `SELECT * FROM ${tableName} WHERE id=?`;
-			conn.query(sql, [id], (err, rows, fields) => {
-				//TODO errors should be passed to callback
-				if (err) throw err;
-				var row = rows.length > 0 ? rows[0] : {};
-				cb(row);
-			});
+			conn.query(sql, [id], cb);
 		},
 		create: (params, cb) => {
 			var sql = `INSERT INTO ${tableName} SET ?`;
-			conn.query(sql, params, (err, result) => {
-				//TODO errors should be passed to callback
-				if (err) throw err;
-				cb({ id: result.insertId });
-			});
+			conn.query(sql, params, cb);
 		},
 		update: (id, params, cb) => {
 			var sql = `UPDATE ${tableName} SET ? WHERE id=?`;
-			conn.query(sql, [params, id], (err, result) => {
-				//TODO errors should be passed to callback
-				if (err) throw err;
-				cb({ updated: true });
-			});
+			conn.query(sql, [params, id], cb);
 		},
 		delete: (id, cb) => {
 			var sql = `DELETE FROM ${tableName} WHERE id=?`;
-			conn.query(sql, [id], (err, result) => {
-				//TODO errors should be passed to callback
-				if (err) throw err;
-				cb({ deleted: true });
-			});
+			conn.query(sql, [id], cb);
 		}
 	}
 }

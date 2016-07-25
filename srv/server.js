@@ -49,31 +49,57 @@ function addTableRoute(router, url, table) {
 	thandler = db.getCrudHandler(dbconn, table);
 	router.route(url)
 		.get((req, res) => {
-			//TODO add "self" property to each item
-			thandler.find(req.params, items => res.json({ items }));
+			thandler.find(req.params, (err, rows, fields) => {
+				if (err) return handleError(err, res);
+				//TODO add "self" property to each item
+				res.json({ items: rows });
+			});
 		})
 		.post((req, res) => {
-			//TODO validate req.body to be non-empty
-			thandler.create(req.body, result => {
-				result.self = fullLink(req, url, result.id);
-				res.json(result);
+			thandler.create(req.body, (err, result) => {
+				if (err) return handleError(err, res);
+				//TODO validate req.body to be non-empty
+				var id = result.insertId;
+				res.json({
+					id,
+					self: fullLink(req, url, id)
+				});
 			});
 		});
 	router.route(url + '/:id')
 		.get((req, res) => {
-			//TODO add "self" property
-			thandler.byId(req.params.id, item => res.json(item));
+			thandler.byId(req.params.id, (err, rows, fields) => {
+				if (err) return handleError(err, res);
+				//TODO add "self" property
+				var row = rows.length > 0 ? rows[0] : {};
+				res.json(row);
+			});
 		})
 		.put((req, res) => {
-			//TODO validate req.body to be non-empty
-			thandler.update(req.params.id, req.body, result => res.json(result));
+			thandler.update(req.params.id, req.body, (err, result) => {
+				//TODO validate req.body to be non-empty
+				if (err) return handleError(err, res);
+				res.json({ updated: true });
+			});
 		})
 		.delete((req, res) => {
-			thandler.delete(req.params.id, result => res.json(result));
+			thandler.delete(req.params.id, (err, result) => {
+				if (err) return handleError(err, res);
+				res.json({ deleted: true });
+			});
 		});
 }
 
 function fullLink(req, url, id) {
 	var protocol = req.secure ? "https" : "http";
 	return protocol + '://' + req.headers.host + req.baseUrl + url + '/' + id;
+}
+
+function handleError(err, res) {
+	console.warn('Error from DB:', err);
+	//TODO inspect err and pass helpful information to client
+	res.status(400)
+	.json({
+		message: 'Bad Request'
+	});
 }
