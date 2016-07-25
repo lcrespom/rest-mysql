@@ -8,5 +8,37 @@
 </head>
 <body>
 	Welcome to rest-mysql
+	<script>
+		function testGetAll() {
+			$.get('/api/test', r => console.log(r));
+		}
+		function testGetOne(id) {
+			$.get('/api/test/' + id, r => console.log(r));
+		}
+		function testPost(num) {
+			$.ajax('/api/test/', {
+				method: 'POST',
+				data: {
+					name: 'name' + id,
+					x: id,
+					y: id
+				},
+				success: r => console.log(r)
+			});
+		}
+		function testPut(id, newName) {
+			$.ajax('/api/test/' + id, {
+				method: 'PUT',
+				data: { name: newName },
+				success: r => console.log(r)
+			});
+		}
+		function testDelete(id) {
+			$.ajax('/api/test/' + id, {
+				method: 'DELETE',
+				success: r => console.log(r)
+			});
+		}
+	</script>
 </body>
 </html>

@@ -53,6 +53,7 @@ function addTableRoute(router, url, table) {
 			thandler.find(req.params, items => res.json({ items }));
 		})
 		.post((req, res) => {
+			//TODO validate req.body to be non-empty
 			thandler.create(req.body, result => {
 				result.self = fullLink(req, url, result.id);
 				res.json(result);
@@ -64,6 +65,7 @@ function addTableRoute(router, url, table) {
 			thandler.byId(req.params.id, item => res.json(item));
 		})
 		.put((req, res) => {
+			//TODO validate req.body to be non-empty
 			thandler.update(req.params.id, req.body, result => res.json(result));
 		})
 		.delete((req, res) => {
