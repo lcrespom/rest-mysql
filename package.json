@@ -2,6 +2,10 @@
   "name": "rest-mysql",
   "version": "1.0.0",
   "description": "REST with Express and MySQL",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/lcrespom/rest-mysql.git"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node srv/server"
