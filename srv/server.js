@@ -10,7 +10,7 @@ var dbconn = db.setup(mysqlConfig);
 var app = createApp();
 var router = createRouter();
 addTableRoute(router, '/test', 'test2');
-app.use('/api', router);	// all of our routes will be prefixed with /api
+app.use('/api', router);	// all REST API routes will be prefixed with /api
 app.use(express.static('web'));
 var port = process.env.PORT || 1337;
 app.listen(port);			// Start server
@@ -45,8 +45,8 @@ function createRouter() {
 }
 
 function addTableRoute(router, url, table) {
-	//TODO proper, generic error handling
 	thandler = db.getCrudHandler(dbconn, table);
+	//---------- Routes without id (get list, post new) ----------
 	router.route(url)
 		.get((req, res) => {
 			thandler.find(req.params, (err, rows, fields) => {
@@ -57,8 +57,12 @@ function addTableRoute(router, url, table) {
 		})
 		.post((req, res) => {
 			thandler.create(req.body, (err, result) => {
-				if (err) return handleError(err, res);
-				//TODO validate req.body to be non-empty
+				if (err) {
+					if (Object.keys(req.body).length == 0)
+						return handleEmptyBodyError(err, res);
+					else
+						return handleError(err, res);
+				}
 				var id = result.insertId;
 				res.json({
 					id,
@@ -66,6 +70,7 @@ function addTableRoute(router, url, table) {
 				});
 			});
 		});
+	//---------- Routes with id (get one, put, delete) ----------
 	router.route(url + '/:id')
 		.get((req, res) => {
 			thandler.byId(req.params.id, (err, rows, fields) => {
@@ -77,12 +82,16 @@ function addTableRoute(router, url, table) {
 		})
 		.put((req, res) => {
 			thandler.update(req.params.id, req.body, (err, result) => {
-				//TODO validate req.body to be non-empty
-				if (err) return handleError(err, res);
+				if (err) {
+					if (Object.keys(req.body).length == 0)
+						return handleEmptyBodyError(err, res);
+					else
+						return handleError(err, res);
+				}
 				if (result.changedRows > 0)
 					res.json({ updated: true });
 				else
-					respondNotFound(req, res, url, req.params.id);
+					handleNotFoundError(req, res, url, req.params.id);
 			});
 		})
 		.delete((req, res) => {
@@ -91,7 +100,7 @@ function addTableRoute(router, url, table) {
 				if (result.changedRows > 0)
 					res.json({ deleted: true });
 				else
-					respondNotFound(req, res, url, req.params.id);
+					handleNotFoundError(req, res, url, req.params.id);
 			});
 		});
 }
@@ -101,16 +110,35 @@ function fullLink(req, url, id) {
 	return protocol + '://' + req.headers.host + req.baseUrl + url + '/' + id;
 }
 
+
+//------------------------------ Error handling ------------------------------
+
 function handleError(err, res) {
+	if (err.code == 'ER_PARSE_ERROR') {
+		console.error('SQL Parse error from DB:', err);
+		res.status(500)
+		.json({
+			message: 'Server error'
+		});
+	}
+	else {
+		console.warn('Error from DB:', err);
+		res.status(400)
+		.json({
+			message: 'Bad Request'
+		});
+	}
+}
+
+function handleEmptyBodyError(err, res) {
 	console.warn('Error from DB:', err);
-	//TODO inspect err and pass helpful information to client
 	res.status(400)
 	.json({
-		message: 'Bad Request'
+		message: 'Bad Request: body should not be empty'
 	});
 }
 
-function respondNotFound(req, res, url, id) {
+function handleNotFoundError(req, res, url, id) {
 	res.status(404)
 	.json({
 		message: `Item ${fullLink(req, url, id)} not found`

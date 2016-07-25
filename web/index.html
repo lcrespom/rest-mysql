@@ -39,6 +39,23 @@
 				success: r => console.log(r)
 			});
 		}
+		//Errors
+		function testErrorPutEmptyBody(id) {
+			$.ajax('/api/test/' + id, {
+				method: 'PUT',
+				success: r => console.log(r)
+			});
+		}
+		function testErrorPostInvalidColumn() {
+			$.ajax('/api/test/', {
+				method: 'POST',
+				data: {
+					name: 'should not work',
+					doesNotExist: 'whatever'
+				},
+				success: r => console.log(r)
+			});
+		}
 	</script>
 </body>
 </html>
