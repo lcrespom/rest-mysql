@@ -51,11 +51,12 @@ function addTableRoute(router, url, table) {
 		.get((req, res) => {
 			thandler.find(req.params, (err, rows, fields) => {
 				if (err) return handleError(err, res);
-				//TODO add "self" property to each item
+				rows.forEach(row => row.self = fullLink(req, url, row.id));
 				res.json({ items: rows });
 			});
 		})
 		.post((req, res) => {
+			delete req.body.self; // Just in case, remove "self" from req.body
 			thandler.create(req.body, (err, result) => {
 				if (err) {
 					if (Object.keys(req.body).length == 0)
@@ -73,15 +74,23 @@ function addTableRoute(router, url, table) {
 	//---------- Routes with id (get one, put, delete) ----------
 	router.route(url + '/:id')
 		.get((req, res) => {
-			thandler.byId(req.params.id, (err, rows, fields) => {
+			var id = req.params.id;
+			thandler.byId(id, (err, rows, fields) => {
 				if (err) return handleError(err, res);
-				//TODO add "self" property
-				var row = rows.length > 0 ? rows[0] : {};
-				res.json(row);
+				if (rows.length == 0) {
+					handleNotFoundError(req, res, url, id);
+				}
+				else {
+					var row = rows[0];
+					row.self = fullLink(req, url, id);
+					res.json(row);
+				}
 			});
 		})
 		.put((req, res) => {
-			thandler.update(req.params.id, req.body, (err, result) => {
+			delete req.body.self; // Just in case, remove "self" from req.body
+			var id = req.params.id;
+			thandler.update(id, req.body, (err, result) => {
 				if (err) {
 					if (Object.keys(req.body).length == 0)
 						return handleEmptyBodyError(err, res);
@@ -89,9 +98,12 @@ function addTableRoute(router, url, table) {
 						return handleError(err, res);
 				}
 				if (result.changedRows > 0)
-					res.json({ updated: true });
+					res.json({
+						updated: true,
+						self: fullLink(req, url, id)
+					});
 				else
-					handleNotFoundError(req, res, url, req.params.id);
+					handleNotFoundError(req, res, url, id);
 			});
 		})
 		.delete((req, res) => {
