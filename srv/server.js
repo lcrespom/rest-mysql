@@ -5,11 +5,16 @@ var db = require('./db');
 var mysqlConfig = require('./mysql-config.json');
 
 
+var ROUTE_LINKS = [];
 mysqlConfig.port = process.env.MYSQL_PORT || mysqlConfig.port;
 var dbconn = db.setup(mysqlConfig);
 var app = createApp();
 var router = createRouter();
-addTableRoute(router, '/test', 'test2');
+addTableRoute(router, {
+	url: '/test',
+	table: 'test2',
+	title: 'Testing table'
+});
 app.use('/api', router);	// all REST API routes will be prefixed with /api
 app.use(express.static('web'));
 var port = process.env.PORT || 1337;
@@ -27,8 +32,6 @@ function createApp() {
 	return app;
 }
 
-
-
 //-------------------- Router --------------------
 
 function createRouter() {
@@ -38,13 +41,24 @@ function createRouter() {
 		next();
 	});
 	router.get('/', (req, res) => {
-		//TODO provide some HATEOAS-style links
-		res.json({ message: 'Welcome to the REST API' });
+		// Return API catalog in HATEOAS style
+		res.json({ 'link-templates': ROUTE_LINKS });
 	});
 	return router;
 }
 
-function addTableRoute(router, url, table) {
+function registerRoute(routeConfig) {
+	ROUTE_LINKS.push({
+		rel: routeConfig.url.substr(1),
+		href: '/api' + routeConfig.url,
+		title: routeConfig.title
+	});
+}
+
+function addTableRoute(router, routeConfig) {
+	registerRoute(routeConfig);
+	var url = routeConfig.url;
+	var table = routeConfig.table;
 	thandler = db.getCrudHandler(dbconn, table);
 	//---------- Routes without id (get list, post new) ----------
 	router.route(url)
