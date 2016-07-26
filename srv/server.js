@@ -11,6 +11,7 @@ var tableRoutes = [{
 	table: 'test2',
 	title: 'Testing table'
 }];
+var webPath = process.argv[2] || 'web';
 var mysqlConfig = require('./mysql-config.json');
 mysqlConfig.port = process.env.MYSQL_PORT || mysqlConfig.port;
 // Create DB connection
@@ -22,7 +23,7 @@ for (var route of tableRoutes)
 // App startup
 var app = createApp();
 app.use('/api', router);			// Register REST API
-app.use(express.static('web'));		// Register static web server
+app.use(express.static(webPath));		// Register static web server
 app.listen(WEB_PORT);
 console.log('API server ready on port ' + WEB_PORT);
 
