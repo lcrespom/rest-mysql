@@ -1,25 +1,30 @@
 var express = require('express');
 var bodyParser = require('body-parser');
-
 var db = require('./db');
-var mysqlConfig = require('./mysql-config.json');
 
-
+// Init configuration data
+var HATEOAS_LINKS = true;
 var ROUTE_LINKS = [];
-mysqlConfig.port = process.env.MYSQL_PORT || mysqlConfig.port;
-var dbconn = db.setup(mysqlConfig);
-var app = createApp();
-var router = createRouter();
-addTableRoute(router, {
+var WEB_PORT = process.env.PORT || 1337;
+var tableRoutes = [{
 	url: '/test',
 	table: 'test2',
 	title: 'Testing table'
-});
-app.use('/api', router);	// all REST API routes will be prefixed with /api
-app.use(express.static('web'));
-var port = process.env.PORT || 1337;
-app.listen(port);			// Start server
-console.log('API server ready on port ' + port);
+}];
+var mysqlConfig = require('./mysql-config.json');
+mysqlConfig.port = process.env.MYSQL_PORT || mysqlConfig.port;
+// Create DB connection
+var dbconn = db.setup(mysqlConfig);
+// Router setup
+var router = createRouter();
+for (var route of tableRoutes)
+	addTableRoute(router, route);
+// App startup
+var app = createApp();
+app.use('/api', router);			// Register REST API
+app.use(express.static('web'));		// Register static web server
+app.listen(WEB_PORT);
+console.log('API server ready on port ' + WEB_PORT);
 
 
 //-------------------- App setup  --------------------
@@ -65,12 +70,12 @@ function addTableRoute(router, routeConfig) {
 		.get((req, res) => {
 			thandler.find(req.params, (err, rows, fields) => {
 				if (err) return handleError(err, res);
-				rows.forEach(row => row.self = fullLink(req, url, row.id));
+				rows.forEach(row => addSelfLink(row, req, url, row.id));
 				res.json({ items: rows });
 			});
 		})
 		.post((req, res) => {
-			delete req.body.self; // Just in case, remove "self" from req.body
+			removeSelfLink(req.body);
 			thandler.create(req.body, (err, result) => {
 				if (err) {
 					if (Object.keys(req.body).length == 0)
@@ -79,10 +84,7 @@ function addTableRoute(router, routeConfig) {
 						return handleError(err, res);
 				}
 				var id = result.insertId;
-				res.json({
-					id,
-					self: fullLink(req, url, id)
-				});
+				res.json(addSelfLink({ id }, req, url, id));
 			});
 		});
 	//---------- Routes with id (get one, put, delete) ----------
@@ -96,13 +98,12 @@ function addTableRoute(router, routeConfig) {
 				}
 				else {
 					var row = rows[0];
-					row.self = fullLink(req, url, id);
-					res.json(row);
+					res.json(addSelfLink(row, req, url, id));
 				}
 			});
 		})
 		.put((req, res) => {
-			delete req.body.self; // Just in case, remove "self" from req.body
+			removeSelfLink(req.body);
 			var id = req.params.id;
 			thandler.update(id, req.body, (err, result) => {
 				if (err) {
@@ -112,10 +113,7 @@ function addTableRoute(router, routeConfig) {
 						return handleError(err, res);
 				}
 				if (result.changedRows > 0)
-					res.json({
-						updated: true,
-						self: fullLink(req, url, id)
-					});
+					res.json(addSelfLink({ updated: true }, req, url, id));
 				else
 					handleNotFoundError(req, res, url, id);
 			});
@@ -129,6 +127,17 @@ function addTableRoute(router, routeConfig) {
 					handleNotFoundError(req, res, url, req.params.id);
 			});
 		});
+}
+
+function addSelfLink(obj, req, url, id) {
+	if (!HATEOAS_LINKS) return obj;
+	obj.self = fullLink(req, url, id);
+	return obj;
+}
+
+function removeSelfLink(obj) {
+	if (!HATEOAS_LINKS) return obj;
+	delete obj.self;
 }
 
 function fullLink(req, url, id) {
