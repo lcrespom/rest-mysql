@@ -1,6 +1,5 @@
 var mysql = require('mysql');
 
-
 function setup(config) {
 	console.log("DB: creating connection...")
 	var dbconn = mysql.createConnection(config);
@@ -42,6 +41,8 @@ function getCrudHandler(conn, tableName) {
 	}
 }
 
+
 module.exports = {
-	setup, getCrudHandler
+	setup,
+	getCrudHandler
 };
