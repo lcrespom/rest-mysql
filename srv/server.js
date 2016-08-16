@@ -9,6 +9,10 @@ var tableRoutes = [{
 	url: '/test',
 	table: 'test2',
 	title: 'Testing table'
+}, {
+	url: '/customers',
+	table: 'customers',
+	title: 'Customer table'
 }];
 var webPath = process.argv[2] || 'web';
 var mysqlConfig = require('./mysql-config.json');
