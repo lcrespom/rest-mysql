@@ -85,7 +85,7 @@ function addTableRoute(router, routeConfig, dbconn) {
 		.delete((req, res) => {
 			thandler.delete(req.params.id, (err, result) => {
 				if (err) return handleError(err, res);
-				if (result.changedRows > 0)
+				if (result.affectedRows > 0)
 					res.json({ deleted: true });
 				else
 					handleNotFoundError(req, res, url, req.params.id);
