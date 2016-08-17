@@ -28,7 +28,7 @@ function addTableRoute(router, routeConfig, dbconn) {
 	registerRoute(routeConfig);
 	var url = routeConfig.url;
 	var table = routeConfig.table;
-	thandler = db.getCrudHandler(dbconn, table);
+	var thandler = db.getCrudHandler(dbconn, table);
 	//---------- Routes without id (get list, post new) ----------
 	router.route(url)
 		.get((req, res) => {
