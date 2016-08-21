@@ -1,4 +1,5 @@
 var express = require('express');
+var compression = require('compression');
 var bodyParser = require('body-parser');
 var db = require('./db');
 var crudRouter = require('./crud-router');
@@ -34,10 +35,12 @@ console.log('API server ready on port ' + WEB_PORT);
 //-------------------- App setup  --------------------
 function createApp() {
 	var app = express();
-	// configure app to use bodyParser()
+	// Configure app to use bodyParser()
 	// this will let us get the data from a POST
 	app.use(bodyParser.urlencoded({ extended: true }));
 	app.use(bodyParser.json());
+	// Enable gzip compression
+	app.use(compression());
 	return app;
 }
 
