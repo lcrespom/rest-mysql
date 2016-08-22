@@ -1,5 +1,5 @@
 {
-  "name": "rest-mysql",
+  "name": "rest-mysql-express",
   "version": "1.0.0",
   "description": "REST with Express and MySQL",
   "main": "index.js",
