@@ -1,5 +1,5 @@
-import * as db from './srv/db';
-import * as crudRouter from './srv/crud-router';
+var db = require('./srv/db');
+var crudRouter = require('./srv/crud-router');
 
 module.exports = {
 	setupDB: db.setup,
