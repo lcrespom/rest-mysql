@@ -4,6 +4,6 @@ var crudRouter = require('./srv/crud-router');
 module.exports = {
 	setupDB: db.setup,
 	getCrudHandler: db.getCrudHandler,
-	createRouter,
-	addTableRoute
+	createRouter: crudRouter.createRouter,
+	addTableRoute: crudRouter.addTableRoute
 };
