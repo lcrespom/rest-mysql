@@ -43,6 +43,8 @@ function getCrudHandler(conn, tableName) {
 			var options = { sql, nestTables: true };
 			conn.query(options, [id], (err, rows, fields) => {
 				//TODO restructure nested tables so main table is root
+				if (rows[0])
+					rows[0] = mergeRow(rows[0], tableName, fkeys);
 				cb(err, rows, fields);
 			});
 		}
@@ -58,6 +60,13 @@ function sqlLeftJoin(tableName, fkeys) {
 		ljoin += ` LEFT JOIN ${ftable} ON ${tableName}.${fk} = ${ftable}.id`;
 	}
 	return `SELECT ${select} FROM ${tableName} ${ljoin}`;
+}
+
+function mergeRow(obj, tableName, fkeys) {
+	var result = obj[tableName];
+	for (var fk of Object.keys(fkeys))
+		result[fk + '_obj'] = obj[fkeys[fk]];
+	return result;
 }
 
 
