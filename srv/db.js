@@ -65,7 +65,7 @@ function sqlLeftJoin(tableName, fkeys) {
 function mergeRow(obj, tableName, fkeys) {
 	var result = obj[tableName];
 	for (var fk of Object.keys(fkeys))
-		result[fk + '_obj'] = obj[fkeys[fk]];
+		result['$' + fk] = obj[fkeys[fk]];
 	return result;
 }
 
