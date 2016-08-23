@@ -27,8 +27,7 @@ function registerRoute(routeConfig) {
 function addTableRoute(router, routeConfig, dbconn) {
 	registerRoute(routeConfig);
 	var url = routeConfig.url;
-	var table = routeConfig.table;
-	var thandler = db.getCrudHandler(dbconn, table);
+	var thandler = db.getCrudHandler(dbconn, routeConfig.table);
 	//---------- Routes without id (get list, post new) ----------
 	router.route(url)
 		.get((req, res) => {
@@ -52,20 +51,8 @@ function addTableRoute(router, routeConfig, dbconn) {
 			});
 		});
 	//---------- Routes with id (get one, put, delete) ----------
+	registerGetOne(router, url, thandler, routeConfig.fkGetOne);
 	router.route(url + '/:id')
-		.get((req, res) => {
-			var id = req.params.id;
-			thandler.byId(id, (err, rows, fields) => {
-				if (err) return handleError(err, res);
-				if (rows.length == 0) {
-					handleNotFoundError(req, res, url, id);
-				}
-				else {
-					var row = rows[0];
-					res.json(addSelfLink(row, req, url, id));
-				}
-			});
-		})
 		.put((req, res) => {
 			removeSelfLink(req.body);
 			var id = req.params.id;
@@ -79,7 +66,7 @@ function addTableRoute(router, routeConfig, dbconn) {
 				if (result.changedRows > 0)
 					res.json(addSelfLink({ updated: true }, req, url, id));
 				else
-					handleNotFoundError(req, res, url, id);
+					handleNotFoundError(req, url, id);
 			});
 		})
 		.delete((req, res) => {
@@ -88,10 +75,30 @@ function addTableRoute(router, routeConfig, dbconn) {
 				if (result.affectedRows > 0)
 					res.json({ deleted: true });
 				else
-					handleNotFoundError(req, res, url, req.params.id);
+					handleNotFoundError(req, url, req.params.id);
 			});
 		});
 }
+
+function registerGetOne(router, url, thandler, fkeys) {
+	router.route(url + '/:id').get((req, res) => {
+		var id = req.params.id;
+		var byIdCB = (err, rows, fields) => {
+			if (err) return handleError(err, res);
+			if (rows.length == 0)
+				handleNotFoundError(req, url, id);
+			else
+				res.json(addSelfLink(rows[0], req, url, id));
+		}
+		if (fkeys)
+			thandler.byIdWithFK(id, fkeys, byIdCB);
+		else
+			thandler.byId(id, byIdCB);
+	});
+}
+
+
+//------------------------------ HATEOAS utils ------------------------------
 
 function addSelfLink(obj, req, url, id) {
 	if (!HATEOAS_LINKS) return obj;
@@ -137,7 +144,7 @@ function handleEmptyBodyError(err, res) {
 	});
 }
 
-function handleNotFoundError(req, res, url, id) {
+function handleNotFoundError(req, url, id) {
 	res.status(404)
 	.json({
 		message: `Item ${fullLink(req, url, id)} not found`

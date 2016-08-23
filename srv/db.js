@@ -37,8 +37,27 @@ function getCrudHandler(conn, tableName) {
 		delete: (id, cb) => {
 			var sql = `DELETE FROM ${tableName} WHERE id=?`;
 			conn.query(sql, [id], cb);
+		},
+		byIdWithFK: (id, fkeys, cb) => {
+			var sql = sqlLeftJoin(tableName, fkeys) + ` WHERE ${tableName}.id = ?`;
+			var options = { sql, nestTables: true };
+			conn.query(options, [id], (err, rows, fields) => {
+				//TODO restructure nested tables so main table is root
+				cb(err, rows, fields);
+			});
 		}
 	}
+}
+
+function sqlLeftJoin(tableName, fkeys) {
+	var select = tableName + '.*';
+	var ljoin = '';
+	for (var fk of Object.keys(fkeys)) {
+		var ftable = fkeys[fk];
+		select += ', ' + ftable + '.*';
+		ljoin += ` LEFT JOIN ${ftable} ON ${tableName}.${fk} = ${ftable}.id`;
+	}
+	return `SELECT ${select} FROM ${tableName} ${ljoin}`;
 }
 
 

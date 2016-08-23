@@ -11,9 +11,14 @@ var tableRoutes = [{
 	table: 'test2',
 	title: 'Testing table'
 }, {
+	url: '/addresses',
+	table: 'addresses',
+	title: 'Postal address'
+}, {
 	url: '/customers',
 	table: 'customers',
-	title: 'Customer table'
+	title: 'Customer table',
+	//fkGetOne: { id_pickup_addr: 'addresses' }
 }];
 var webPath = process.argv[2] || 'web';
 var mysqlConfig = require('./mysql-config.json');
