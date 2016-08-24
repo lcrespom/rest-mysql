@@ -29,31 +29,18 @@ function addTableRoute(router, routeConfig, dbconn) {
 	var url = routeConfig.url;
 	var thandler = db.getCrudHandler(dbconn, routeConfig.table);
 	//---------- Routes without id (get list, post new) ----------
-	router.route(url)
-		.get((req, res) => {
-			thandler.find(req.params, (err, rows, fields) => {
-				if (err) return handleError(err, res);
-				rows.forEach(row => addSelfLink(row, req, url, row.id));
-				res.json({ items: rows });
-			});
-		})
-		.post((req, res) => {
-			removeSelfLink(req.body);
-			thandler.create(req.body, (err, result) => {
-				if (err) {
-					if (Object.keys(req.body).length == 0)
-						return handleEmptyBodyError(err, res);
-					else
-						return handleError(err, res);
-				}
-				var id = result.insertId;
-				res.status(201).json(addSelfLink({ id }, req, url, id));
-			});
+	router.route(url).get((req, res) => {
+		thandler.find(req.params, (err, rows, fields) => {
+			if (err) return handleError(err, res);
+			rows.forEach(row => addSelfLink(row, req, url, row.id));
+			res.json({ items: rows });
 		});
+	});
+	registerPost(router, url, thandler, routeConfig.fkCreate);
 	//---------- Routes with id (get one, put, delete) ----------
 	registerGetOne(router, url, thandler, routeConfig.fkGetOne);
-	registerUpdate(router, url, thandler, routeConfig.fkUpdate);
-	router.delete((req, res) => {
+	registerPut(router, url, thandler, routeConfig.fkUpdate);
+	router.route(url + '/:id').delete((req, res) => {
 			thandler.delete(req.params.id, (err, result) => {
 				if (err) return handleError(err, res);
 				if (result.affectedRows > 0)
@@ -62,6 +49,25 @@ function addTableRoute(router, routeConfig, dbconn) {
 					handleNotFoundError(req, url, req.params.id);
 			});
 		});
+}
+
+function registerPost(router, url, thandler, fkeys) {
+	router.route(url).post((req, res) => {
+		var createCB = (err, result) => {
+			if (err) {
+				if (Object.keys(req.body).length == 0)
+					return handleEmptyBodyError(err, res);
+				else
+					return handleError(err, res);
+			}
+			var id = result.insertId;
+			res.status(201).json(addSelfLink({ id }, req, url, id));
+		};
+		if (fkeys)
+			thandler.createWithFK(req.body, fkeys, createCB);
+		else
+			thandler.create(req.body, createCB);
+	});
 }
 
 function registerGetOne(router, url, thandler, fkeys) {
@@ -81,7 +87,7 @@ function registerGetOne(router, url, thandler, fkeys) {
 	});
 }
 
-function registerUpdate(router, url, thandler, fkeys) {
+function registerPut(router, url, thandler, fkeys) {
 	router.route(url + '/:id').put((req, res) => {
 		removeSelfLink(req.body);
 		var id = req.params.id;

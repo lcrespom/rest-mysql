@@ -48,6 +48,28 @@ function getCrudHandler(conn, tableName) {
 				cb(err, rows, fields);
 			});
 		},
+		createWithFK: (params, fkeys, cb) => {
+			var objs = splitObj(params, tableName, fkeys);
+			var owner = objs[tableName];
+			var errs = [];
+			var results = [];
+			var fkNames = Object.keys(fkeys);
+			var keys = Object.keys(objs);
+			keys.shift();
+			for (var key of keys) {
+				var sql = `INSERT INTO ${key} SET ?`;
+				conn.query(sql, objs[key], (err, result) => {
+					errs.push(err);
+					if (!err)
+						owner[fkNames[results.length]] = result.insertId;
+					results.push(result);
+					if (results.length == keys.length) {
+						sql = `INSERT INTO ${tableName} SET ?`;
+						conn.query(sql, owner, cb);
+					}
+				});
+			}
+		},
 		updateWithFK: (id, params, fkeys, cb) => {
 			var objs = splitObj(params, tableName, fkeys);
 			var errs = [];
