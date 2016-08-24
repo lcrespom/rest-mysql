@@ -42,11 +42,12 @@ function addTableRoute(router, routeConfig, dbconn) {
 	registerPut(router, url, thandler, routeConfig.fkUpdate);
 	router.route(url + '/:id').delete((req, res) => {
 			thandler.delete(req.params.id, (err, result) => {
+				//TODO cascade on delete (FK consnstraint does not seem to work)
 				if (err) return handleError(err, res);
 				if (result.affectedRows > 0)
 					res.json({ deleted: true });
 				else
-					handleNotFoundError(req, url, req.params.id);
+					handleNotFoundError(req, res, url, req.params.id);
 			});
 		});
 }
@@ -76,7 +77,7 @@ function registerGetOne(router, url, thandler, fkeys) {
 		var byIdCB = (err, rows, fields) => {
 			if (err) return handleError(err, res);
 			if (rows.length == 0)
-				handleNotFoundError(req, url, id);
+				handleNotFoundError(req, res, url, id);
 			else
 				res.json(addSelfLink(rows[0], req, url, id));
 		};
@@ -98,10 +99,10 @@ function registerPut(router, url, thandler, fkeys) {
 				else
 					return handleError(err, res);
 			}
-			if (result.changedRows > 0)
+			if (result.affectedRows > 0)
 				res.json(addSelfLink({ updated: true }, req, url, id));
 			else
-				handleNotFoundError(req, url, id);
+				handleNotFoundError(req, res, url, id);
 		};
 		if (fkeys)
 			thandler.updateWithFK(id, req.body, fkeys, updateCB);
@@ -157,7 +158,7 @@ function handleEmptyBodyError(err, res) {
 	});
 }
 
-function handleNotFoundError(req, url, id) {
+function handleNotFoundError(req, res, url, id) {
 	res.status(404)
 	.json({
 		message: `Item ${fullLink(req, url, id)} not found`
