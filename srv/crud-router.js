@@ -52,24 +52,8 @@ function addTableRoute(router, routeConfig, dbconn) {
 		});
 	//---------- Routes with id (get one, put, delete) ----------
 	registerGetOne(router, url, thandler, routeConfig.fkGetOne);
-	router.route(url + '/:id')
-		.put((req, res) => {
-			removeSelfLink(req.body);
-			var id = req.params.id;
-			thandler.update(id, req.body, (err, result) => {
-				if (err) {
-					if (Object.keys(req.body).length == 0)
-						return handleEmptyBodyError(err, res);
-					else
-						return handleError(err, res);
-				}
-				if (result.changedRows > 0)
-					res.json(addSelfLink({ updated: true }, req, url, id));
-				else
-					handleNotFoundError(req, url, id);
-			});
-		})
-		.delete((req, res) => {
+	registerUpdate(router, url, thandler, routeConfig.fkUpdate);
+	router.delete((req, res) => {
 			thandler.delete(req.params.id, (err, result) => {
 				if (err) return handleError(err, res);
 				if (result.affectedRows > 0)
@@ -89,11 +73,34 @@ function registerGetOne(router, url, thandler, fkeys) {
 				handleNotFoundError(req, url, id);
 			else
 				res.json(addSelfLink(rows[0], req, url, id));
-		}
+		};
 		if (fkeys)
 			thandler.byIdWithFK(id, fkeys, byIdCB);
 		else
 			thandler.byId(id, byIdCB);
+	});
+}
+
+function registerUpdate(router, url, thandler, fkeys) {
+	router.route(url + '/:id').put((req, res) => {
+		removeSelfLink(req.body);
+		var id = req.params.id;
+		var updateCB = (err, result) => {
+			if (err) {
+				if (Object.keys(req.body).length == 0)
+					return handleEmptyBodyError(err, res);
+				else
+					return handleError(err, res);
+			}
+			if (result.changedRows > 0)
+				res.json(addSelfLink({ updated: true }, req, url, id));
+			else
+				handleNotFoundError(req, url, id);
+		};
+		if (fkeys)
+			thandler.updateWithFK(id, req.body, fkeys, updateCB);
+		else
+			thandler.update(id, req.body, updateCB);
 	});
 }
 

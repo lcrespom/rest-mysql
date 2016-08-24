@@ -1,6 +1,6 @@
 {
   "name": "rest-mysql-express",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "REST with Express and MySQL",
   "main": "index.js",
   "repository": {

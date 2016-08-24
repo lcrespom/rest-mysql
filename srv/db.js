@@ -38,15 +38,31 @@ function getCrudHandler(conn, tableName) {
 			var sql = `DELETE FROM ${tableName} WHERE id=?`;
 			conn.query(sql, [id], cb);
 		},
+
 		byIdWithFK: (id, fkeys, cb) => {
 			var sql = sqlLeftJoin(tableName, fkeys) + ` WHERE ${tableName}.id = ?`;
 			var options = { sql, nestTables: true };
 			conn.query(options, [id], (err, rows, fields) => {
-				//TODO restructure nested tables so main table is root
-				if (rows[0])
-					rows[0] = mergeRow(rows[0], tableName, fkeys);
+				if (rows && rows[0])
+					rows[0] = mergeObj(rows[0], tableName, fkeys);
 				cb(err, rows, fields);
 			});
+		},
+		updateWithFK: (id, params, fkeys, cb) => {
+			var objs = splitObj(params, tableName, fkeys);
+			var errs = [];
+			var results = [];
+			var keys = Object.keys(objs);
+			for (var key of keys) {
+				var sql = `UPDATE ${key} SET ? WHERE id=?`;
+				var id = objs[key].id;
+				conn.query(sql, [objs[key], id], (err, result) => {
+					errs.push(err);
+					results.push(result);
+					if (results.length == keys.length)
+						cb(errs.find(e => e != null), results[0]);
+				});
+			}
 		}
 	}
 }
@@ -62,13 +78,26 @@ function sqlLeftJoin(tableName, fkeys) {
 	return `SELECT ${select} FROM ${tableName} ${ljoin}`;
 }
 
-function mergeRow(obj, tableName, fkeys) {
+function mergeObj(obj, tableName, fkeys) {
 	var result = obj[tableName];
 	for (var fk of Object.keys(fkeys))
 		result['$' + fk] = obj[fkeys[fk]];
 	return result;
 }
 
+function splitObj(obj, tableName, fkeys) {
+	var result = {};
+	result[tableName] = obj;
+	for (var k of Object.keys(obj)) {
+		if (k[0] == '$') {
+			var tname = fkeys[k.substr(1)];
+			delete obj[k].self; // Remove HATEOAS self
+			result[tname] = obj[k];
+			delete obj[k];
+		}
+	}
+	return result;
+}
 
 module.exports = {
 	setup,

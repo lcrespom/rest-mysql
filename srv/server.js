@@ -18,7 +18,8 @@ var tableRoutes = [{
 	url: '/customers',
 	table: 'customers',
 	title: 'Customer table',
-	fkGetOne: { id_pickup_addr: 'addresses' }
+	fkGetOne: { id_pickup_addr: 'addresses' },
+	fkUpdate: { id_pickup_addr: 'addresses' }
 }];
 var webPath = process.argv[2] || 'web';
 var mysqlConfig = require('./mysql-config.json');
