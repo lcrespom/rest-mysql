@@ -4,8 +4,9 @@ var bodyParser = require('body-parser');
 var db = require('./db');
 var crudRouter = require('./crud-router');
 
-// Init configuration data
+//-------------------- Init configuration data --------------------
 var WEB_PORT = process.env.PORT || 1337;
+// REST routes
 var tableRoutes = [{
 	url: '/test',
 	table: 'test2',
@@ -22,9 +23,16 @@ var tableRoutes = [{
 	fkUpdate: { id_pickup_addr: 'addresses' },
 	fkCreate: { id_pickup_addr: 'addresses' }
 }];
+// Location of static resources
 var webPath = process.argv[2] || 'web';
+// Angular 2 app routes, redirected to index.html
+var ngRoutes = [];
+if (process.argv[3]) ngRoutes = process.argv[3].split(':');
+// Database configuration
 var mysqlConfig = require('./mysql-config.json');
 mysqlConfig.port = process.env.MYSQL_PORT || mysqlConfig.port;
+
+//-------------------- Server setup --------------------
 // Create DB connection
 var dbconn = db.setup(mysqlConfig);
 // Router setup
@@ -34,7 +42,9 @@ for (var routeConfig of tableRoutes)
 // App startup
 var app = createApp();
 app.use('/api', router);			// Register REST API
-app.use(express.static(webPath));		// Register static web server
+var static = express.static(webPath);
+ngRoutes.forEach(route => app.use('/' + route + '/*', static));
+app.use(static);		// Register static web server
 app.listen(WEB_PORT);
 console.log('API server ready on port ' + WEB_PORT);
 
