@@ -25,24 +25,30 @@ var router = crudRouter.createRouter(express);
 for (var routeConfig of tableRoutes)
 	crudRouter.addTableRoute(router, routeConfig, dbconn);
 // App startup
-var app = createApp();
-app.use('/api', router);			// Register REST API
-var static = express.static(webPath);
-ngRoutes.forEach(route => app.use('/' + route + '/*', static));
-app.use(static);		// Register static web server
+var app = createExpressApp();
+// Register REST API
+app.use('/api', router);
+// Register static routes
+var serveIndex = (req, res) => res.sendFile(webPath + '/index.html');
+ngRoutes.forEach(route => {
+	app.use('/' + route, serveIndex);
+	app.use('/' + route + '/*', serveIndex);
+});
+app.use(express.static(webPath));
+// And finally, start server
 app.listen(WEB_PORT);
 console.log('API server ready on port ' + WEB_PORT);
 
 
 //-------------------- App setup  --------------------
-function createApp() {
+function createExpressApp() {
 	var app = express();
+	// Enable gzip compression
+	app.use(compression());
 	// Configure app to use bodyParser()
 	// this will let us get the data from a POST
 	app.use(bodyParser.urlencoded({ extended: true }));
 	app.use(bodyParser.json());
-	// Enable gzip compression
-	app.use(compression());
 	return app;
 }
 
