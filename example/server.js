@@ -1,8 +1,8 @@
 var express = require('express');
 var compression = require('compression');
 var bodyParser = require('body-parser');
-var db = require('./db');
-var crudRouter = require('./crud-router');
+var db = require('../src/db');
+var crudRouter = require('../src/crud-router');
 
 //-------------------- Init configuration data --------------------
 var WEB_PORT = process.env.PORT || 1337;
