@@ -1,0 +1,16 @@
+[{
+	"url": "/test",
+	"table": "test2",
+	"title": "Testing table"
+}, {
+	"url": "/addresses",
+	"table": "addresses",
+	"title": "Postal address"
+}, {
+	"url": "/customers",
+	"table": "customers",
+	"title": "Customer table",
+	"fkGetOne": { "id_pickup_addr": "addresses" },
+	"fkUpdate": { "id_pickup_addr": "addresses" },
+	"fkCreate": { "id_pickup_addr": "addresses" }
+}]

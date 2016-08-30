@@ -7,22 +7,7 @@ var crudRouter = require('../src/crud-router');
 //-------------------- Init configuration data --------------------
 var WEB_PORT = process.env.PORT || 1337;
 // REST routes
-var tableRoutes = [{
-	url: '/test',
-	table: 'test2',
-	title: 'Testing table'
-}, {
-	url: '/addresses',
-	table: 'addresses',
-	title: 'Postal address'
-}, {
-	url: '/customers',
-	table: 'customers',
-	title: 'Customer table',
-	fkGetOne: { id_pickup_addr: 'addresses' },
-	fkUpdate: { id_pickup_addr: 'addresses' },
-	fkCreate: { id_pickup_addr: 'addresses' }
-}];
+var tableRoutes = require('./table-routes.json');
 // Location of static resources
 var webPath = process.argv[2] || 'web';
 // Angular 2 app routes, redirected to index.html
