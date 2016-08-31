@@ -43,12 +43,20 @@ console.log('API server ready on port ' + WEB_PORT);
 //-------------------- App setup  --------------------
 function createExpressApp() {
 	var app = express();
-	// Enable gzip compression
-	app.use(compression());
-	// Configure app to use bodyParser()
-	// this will let us get the data from a POST
-	app.use(bodyParser.urlencoded({ extended: true }));
-	app.use(bodyParser.json());
+	setupCompression(app);
+	setupJSON(app);
 	return app;
 }
 
+function setupCompression(app) {
+  	// Enable gzip compression
+  	app.use(compression());
+}
+
+function setupJSON(app) {
+  	// Configure app to use bodyParser()
+  	// this will let us get the data from a POST
+  	app.use(bodyParser.urlencoded({ extended: true }));
+  	app.use(bodyParser.json());
+	return app;
+}
