@@ -5,6 +5,7 @@ Experimenting with generic CRUD access to MYSQL tables via REST,
 following guidelines from [this blog post](https://scotch.io/tutorials/build-a-restful-api-using-node-and-express-4).
 
 ##TODO
-- Write a sample app to test and illustrate usage
+- Consider using morgan package for tracing
+- Consider JWT, see https://scotch.io/tutorials/authenticate-a-node-js-api-with-json-web-tokens
 - Support relationships
 - Support GraphQL (long term)
