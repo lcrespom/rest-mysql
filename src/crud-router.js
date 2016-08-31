@@ -5,6 +5,10 @@ var ROUTE_LINKS = [];
 
 function createRouter(express) {
 	var router = express.Router();
+	router.use((req, res, next) => {
+		//TODO perform common tasks here, e.g. tracing, authentication, etc.
+		next();
+	});
 	router.get('/', (req, res) => {
 		// Return API catalog in HATEOAS style
 		res.json({ 'link-templates': ROUTE_LINKS });
