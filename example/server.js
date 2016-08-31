@@ -1,8 +1,13 @@
 var express = require('express');
 var compression = require('compression');
+var session = require('express-session');
+var FileStore = require('session-file-store')(session);
 var bodyParser = require('body-parser');
+
 var db = require('../src/db');
 var crudRouter = require('../src/crud-router');
+var login = require('../src/login');
+
 
 //-------------------- Init configuration data --------------------
 var WEB_PORT = process.env.PORT || 1337;
@@ -22,6 +27,7 @@ mysqlConfig.port = process.env.MYSQL_PORT || mysqlConfig.port;
 var dbconn = db.setup(mysqlConfig);
 // Router setup
 var router = crudRouter.createRouter(express);
+login.setup(router);
 for (var routeConfig of tableRoutes)
 	crudRouter.addTableRoute(router, routeConfig, dbconn);
 // App startup
@@ -41,14 +47,36 @@ console.log('API server ready on port ' + WEB_PORT);
 
 
 //-------------------- App setup  --------------------
+
 function createExpressApp() {
 	var app = express();
+	setupCompression(app);
+	setupSession(app);
+	setupJSON(app);
+	return app;
+}
+
+function setupCompression(app) {
 	// Enable gzip compression
 	app.use(compression());
+}
+
+function setupSession(app) {
+	// Enable application-wide session support
+	app.use(session({
+		secret: 'puchojanso',
+		resave: false,
+		saveUninitialized: false,
+		store: new FileStore({
+			ttl: 60*60*12	//12 hours of session timeout
+			//,encrypt: true
+		})
+	}));
+}
+
+function setupJSON(app) {
 	// Configure app to use bodyParser()
 	// this will let us get the data from a POST
 	app.use(bodyParser.urlencoded({ extended: true }));
 	app.use(bodyParser.json());
-	return app;
 }
-
