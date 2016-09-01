@@ -26,7 +26,7 @@ var dbconn = db.setup(mysqlConfig);
 var router = crudRouter.createRouter(express);
 for (var routeConfig of tableRoutes)
 	crudRouter.addTableRoute(router, routeConfig, dbconn);
-auth.registerLogin(router, '/login', dbconn, 'users');
+auth.registerLogin(router, '/login', getUserData);
 // App startup
 var app = createExpressApp();
 // Register REST API
@@ -43,7 +43,20 @@ app.listen(WEB_PORT);
 console.log('API server ready on port ' + WEB_PORT);
 
 
-//-------------------- App setup  --------------------
+//-------------------- Getting users for login --------------------
+
+function getUserData(userId, cb) {
+	var sql = `SELECT * FROM users WHERE userid=?`;
+	dbconn.query(sql, [userId], (err, rows) => {
+		let user = null;
+		if (!err && rows)
+			user = rows[0];
+		cb(user);
+	});
+}
+
+
+//-------------------- App setup --------------------
 function createExpressApp() {
 	var app = express();
 	setupCompression(app);
