@@ -12,5 +12,6 @@
 	"title": "Customer table",
 	"fkGetOne": { "id_pickup_addr": "addresses" },
 	"fkUpdate": { "id_pickup_addr": "addresses" },
-	"fkCreate": { "id_pickup_addr": "addresses" }
+	"fkCreate": { "id_pickup_addr": "addresses" },
+	"roles": { "employee": true }
 }]

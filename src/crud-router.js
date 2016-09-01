@@ -1,4 +1,5 @@
 var db = require('./db');
+var auth = require('./auth');
 
 var HATEOAS_LINKS = true;
 var ROUTE_LINKS = [];
@@ -27,6 +28,8 @@ function registerRoute(routeConfig) {
 function addTableRoute(router, routeConfig, dbconn) {
 	registerRoute(routeConfig);
 	var url = routeConfig.url;
+	if (routeConfig.roles)
+		auth.registerAuthorizationCheck(router, routeConfig.roles, url);
 	var thandler = db.getCrudHandler(dbconn, routeConfig.table);
 	//---------- Routes without id (get list, post new) ----------
 	router.route(url).get((req, res) => {

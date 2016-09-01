@@ -1,8 +1,10 @@
 var express = require('express');
 var compression = require('compression');
 var bodyParser = require('body-parser');
+
 var db = require('../src/db');
 var crudRouter = require('../src/crud-router');
+var auth = require('../src/auth');
 
 //-------------------- Init configuration data --------------------
 var WEB_PORT = process.env.PORT || 1337;
@@ -24,6 +26,7 @@ var dbconn = db.setup(mysqlConfig);
 var router = crudRouter.createRouter(express);
 for (var routeConfig of tableRoutes)
 	crudRouter.addTableRoute(router, routeConfig, dbconn);
+auth.registerLogin(router, '/login', dbconn, 'users');
 // App startup
 var app = createExpressApp();
 // Register REST API
@@ -45,6 +48,7 @@ function createExpressApp() {
 	var app = express();
 	setupCompression(app);
 	setupJSON(app);
+	auth.setup(getJwtSecret());
 	return app;
 }
 
@@ -59,4 +63,10 @@ function setupJSON(app) {
   	app.use(bodyParser.urlencoded({ extended: true }));
   	app.use(bodyParser.json());
 	return app;
+}
+
+function getJwtSecret() {
+	return "Mxmbawlx50XOpKkUMcY2wNjoRmU06g3ComNXJfxfnyt9ESuAKSQxe8FXG" +
+		"2dgiEtWdUxbqK9hZ9sWZ4KdGwI5pRmQo0xivuMlh5G2f0ZBco2eDPEZ269Mg" +
+		"z4af93xm9Xg";
 }
