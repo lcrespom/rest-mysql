@@ -11,7 +11,7 @@ function setup(secret) {
 
 function registerLogin(router, loginUrl, getUser) {
 	router.post(loginUrl, (req, res) => {
-		getUser(req.body.userId, user => {
+		getUser(req.body.userid, user => {
 			if (!user) {
 				res.status(401)
 				.json({ message: 'Invalid login'});
@@ -19,12 +19,14 @@ function registerLogin(router, loginUrl, getUser) {
 			else {
 				if (comparePW(req.body.password, user.password)) {
 					var tokenBody = {
-						sub: user.userId,
+						sub: user.userid,
 						aud: user.role
 					};
+					delete user.password;
 					res.status(201)
 					.json({
 						message: 'Login OK',
+						user,
 						//TODO consider sending a cookie
 						token: jwt.sign(tokenBody, jwtSecret)
 					});
