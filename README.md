@@ -6,6 +6,4 @@ following guidelines from [this blog post](https://scotch.io/tutorials/build-a-r
 
 ##TODO
 - Consider using morgan package for tracing
-- Consider JWT, see https://scotch.io/tutorials/authenticate-a-node-js-api-with-json-web-tokens
-- Support relationships
 - Support GraphQL (long term)
