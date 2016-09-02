@@ -1,6 +1,6 @@
-let jwt = require('jsonwebtoken');
+var jwt = require('jsonwebtoken');
 
-let jwtSecret = null;
+var jwtSecret = null;
 
 function setup(secret) {
 	jwtSecret = secret;
@@ -18,7 +18,7 @@ function registerLogin(router, loginUrl, getUser) {
 			}
 			else {
 				if (comparePW(req.body.password, user.password)) {
-					let tokenBody = {
+					var tokenBody = {
 						sub: user.userId,
 						aud: user.role
 					};
@@ -50,7 +50,7 @@ function comparePW(reqPW, dbPW) {
 
 function registerAuthorizationCheck(route, roles, url) {
 	route.use(url, (req, res, next) => {
-		let token = getToken(req);
+		var token = getToken(req);
 		if (!token)
 			return rejectNoToken(res);
 		token = verifyToken(token);
@@ -101,6 +101,8 @@ function rejectNotAuthorized(res) {
 	});
 }
 
+
+//-------------------- Exports --------------------
 
 module.exports = {
 	setup,

@@ -48,7 +48,7 @@ console.log('API server ready on port ' + WEB_PORT);
 function getUserData(userId, cb) {
 	var sql = `SELECT * FROM users WHERE userid=?`;
 	dbconn.query(sql, [userId], (err, rows) => {
-		let user = null;
+		var user = null;
 		if (!err && rows)
 			user = rows[0];
 		cb(user);
