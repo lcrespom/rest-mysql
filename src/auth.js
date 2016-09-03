@@ -27,7 +27,6 @@ function registerLogin(router, loginUrl, getUser) {
 					.json({
 						message: 'Login OK',
 						user,
-						//TODO consider sending a cookie
 						token: jwt.sign(tokenBody, jwtSecret)
 					});
 				}
@@ -66,14 +65,11 @@ function registerAuthorizationCheck(route, roles, url) {
 }
 
 function getToken(req) {
-	//TODO for testing only - replace with real code when app supports JWT
-	return jwt.sign({ sub: 'userid', aud: 'employee' }, jwtSecret);
-	//return req.body.token || req.query.token || req.headers['x-access-token'];
+	return req.headers['x-access-token'] || req.body.token || req.query.token;
 }
 
 function verifyToken(token) {
 	return jwt.verify(token, jwtSecret)
-	//return token;	//TODO decode and return token
 }
 
 function roleAuthorized(token, roles) {
