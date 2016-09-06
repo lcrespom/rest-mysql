@@ -6,4 +6,5 @@ following guidelines from [this blog post](https://scotch.io/tutorials/build-a-r
 
 ##TODO
 - Test https://letsencrypt.org/
+- Setup and document an automated daily database rolling backup system
 - Consider using morgan package for tracing
