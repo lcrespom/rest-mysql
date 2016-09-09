@@ -1,3 +1,5 @@
+var fs = require('fs');
+var https = require('https');
 var express = require('express');
 var compression = require('compression');
 var bodyParser = require('body-parser');
@@ -6,8 +8,10 @@ var db = require('../src/db');
 var crudRouter = require('../src/crud-router');
 var auth = require('../src/auth');
 
+
 //-------------------- Init configuration data --------------------
-var WEB_PORT = process.env.PORT || 1337;
+
+var WEB_PORT = process.env.PORT || 443;
 // REST routes
 var tableRoutes = require('./table-routes.json');
 // Location of static resources
@@ -19,7 +23,9 @@ if (process.argv[3]) ngRoutes = process.argv[3].split(':');
 var mysqlConfig = require('./mysql-config.json');
 mysqlConfig.port = process.env.MYSQL_PORT || mysqlConfig.port;
 
+
 //-------------------- Server setup --------------------
+
 // Create DB connection
 var dbconn = db.setup(mysqlConfig);
 // Router setup
@@ -39,7 +45,15 @@ ngRoutes.forEach(route => {
 });
 app.use(express.static(webPath));
 // And finally, start server
-app.listen(WEB_PORT);
+// SSL self-signed keys using this command:
+//	> openssl req -new -x509 -nodes -out server.crt -keyout server.key
+//  More info here: http://stackoverflow.com/questions/14267010/how-to-create-self-signed-ssl-certificate-for-test-purposes
+var privateKey = fs.readFileSync('example/test-keys/server.key');
+var certificate = fs.readFileSync('example/test-keys/server.crt');
+https.createServer({
+	key: privateKey,
+	cert: certificate
+}, app).listen(WEB_PORT);
 console.log('API server ready on port ' + WEB_PORT);
 
 
