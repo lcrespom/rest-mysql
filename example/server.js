@@ -8,6 +8,8 @@ var db = require('../src/db');
 var crudRouter = require('../src/crud-router');
 var auth = require('../src/auth');
 
+var rides = require('./rides');
+
 
 //-------------------- Init configuration data --------------------
 
@@ -31,7 +33,9 @@ var dbconn = db.setup(mysqlConfig);
 // Router setup
 var router = crudRouter.createRouter(express);
 for (var routeConfig of tableRoutes)
-	crudRouter.addTableRoute(router, routeConfig, dbconn);
+	crudRouter.addCrudRoute(router, routeConfig, dbconn);
+crudRouter.addRoute(router, rides.routeConfig);
+rides.registerRoute(router, dbconn);
 auth.registerLogin(router, '/login', getUserData);
 // App startup
 var app = createExpressApp();
@@ -93,6 +97,7 @@ function setupJSON(app) {
 }
 
 function getJwtSecret() {
+	//TODO change before going to production
 	return "Mxmbawlx50XOpKkUMcY2wNjoRmU06g3ComNXJfxfnyt9ESuAKSQxe8FXG" +
 		"2dgiEtWdUxbqK9hZ9sWZ4KdGwI5pRmQo0xivuMlh5G2f0ZBco2eDPEZ269Mg" +
 		"z4af93xm9Xg";

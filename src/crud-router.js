@@ -25,11 +25,16 @@ function registerRoute(routeConfig) {
 	});
 }
 
-function addTableRoute(router, routeConfig, dbconn) {
+function addRoute(router, routeConfig) {
 	registerRoute(routeConfig);
 	var url = routeConfig.url;
 	if (routeConfig.roles)
 		auth.registerAuthorizationCheck(router, routeConfig.roles, url);
+	return url;
+}
+
+function addCrudRoute(router, routeConfig, dbconn) {
+	var url = addRoute(router, routeConfig);
 	var thandler = db.getCrudHandler(dbconn, routeConfig.table);
 	//---------- Routes without id (get list, post new) ----------
 	router.route(url).get((req, res) => {
@@ -44,15 +49,15 @@ function addTableRoute(router, routeConfig, dbconn) {
 	registerGetOne(router, url, thandler, routeConfig.fkGetOne);
 	registerPut(router, url, thandler, routeConfig.fkUpdate);
 	router.route(url + '/:id').delete((req, res) => {
-			thandler.delete(req.params.id, (err, result) => {
-				//TODO cascade on delete (FK consnstraint does not seem to work)
-				if (err) return handleError(err, res);
-				if (result.affectedRows > 0)
-					res.json({ deleted: true });
-				else
-					handleNotFoundError(req, res, url, req.params.id);
-			});
+		thandler.delete(req.params.id, (err, result) => {
+			//TODO cascade on delete (FK consnstraint does not seem to work)
+			if (err) return handleError(err, res);
+			if (result.affectedRows > 0)
+				res.json({ deleted: true });
+			else
+				handleNotFoundError(req, res, url, req.params.id);
 		});
+	});
 }
 
 function registerPost(router, url, thandler, fkeys) {
@@ -173,5 +178,6 @@ function handleNotFoundError(req, res, url, id) {
 
 module.exports = {
 	createRouter,
-	addTableRoute
+	addRoute,
+	addCrudRoute
 };
