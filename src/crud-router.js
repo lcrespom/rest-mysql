@@ -179,5 +179,9 @@ function handleNotFoundError(req, res, url, id) {
 module.exports = {
 	createRouter,
 	addRoute,
-	addCrudRoute
+	addCrudRoute,
+	addSelfLink,
+	handleError,
+	handleEmptyBodyError,
+	handleNotFoundError
 };
