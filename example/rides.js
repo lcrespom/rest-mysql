@@ -11,12 +11,13 @@ var routeConfig = {
 
 function registerRoute(router, dbconn) {
 	var url = routeConfig.url;
-	var thandler = db.getCrudHandler(dbconn, routeConfig.table);
+	var rideTH = db.getCrudHandler(dbconn, routeConfig.table);
+	var addrTH = db.getCrudHandler(dbconn, 'addresses');
 	router.route(url).get((req, res) => {
 		res.json({ message: 'get pending' });
 	});
 	router.route(url).post((req, res) => {
-		postRide(req, res, thandler, url);
+		postRide(req, res, rideTH, addrTH, url);
 	});
 	router.route(url).put((req, res) => {
 		res.json({ message: 'put pending' });
@@ -59,14 +60,14 @@ function mapColumns(src, map) {
 	return dst;
 }
 
-function postRide(req, res, thandler, url) {
+function postRide(req, res, rideTH, addrTH, url) {
 	var ride = req.body;
-	checkNewAddress(ride.fromAddress, thandler, err1 => {
-		checkNewAddress(ride.toAddress, thandler, err2 => {
+	checkNewAddress(ride.fromAddress, addrTH, err1 => {
+		checkNewAddress(ride.toAddress, addrTH, err2 => {
 			if (err1 || err2)
 				return crudRouter.handleError(err1 ? err1 : err2, res);
 			var backendRide = mapColumns(ride, rideColumns);
-			thandler.create(backendRide, (err, result) => {
+			rideTH.create(backendRide, (err, result) => {
 				if (err)
 					return crudRouter.handleError(err, res);
 				var id = result.insertId;
