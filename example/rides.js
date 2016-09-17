@@ -10,6 +10,9 @@ var routeConfig = {
 	"roles": { "employee": true }
 }
 
+
+//------------------------------ Request handling ------------------------------
+
 function registerRoute(router, dbconn) {
 	var url = routeConfig.url;
 	var rideTH = db.getCrudHandler(dbconn, routeConfig.table);
@@ -26,6 +29,9 @@ function registerRoute(router, dbconn) {
 	});
 	router.route(url).delete((req, res) => {
 		res.json({ message: 'delete pending' });
+	});
+	router.route('/customers/recent_addrs/:id').get((req, res) => {
+		getRecentAddrs(req.params.id, res, dbconn);
 	});
 }
 
@@ -46,6 +52,36 @@ function postRide(req, res, rideTH, addrTH, custTH, url) {
 		});
 	});
 }
+
+function getRecentAddrs(customerId, res, conn) {
+	// Get recent addresses for customer id
+	var sql = 'SELECT recent_addrs FROM customers WHERE id=?';
+	conn.query(sql, [customerId], (err, rows) => {
+		if (err)
+			return crudRouter.handleError(err, res);
+		var recent = rows[0].recent_addrs;
+		if (!validNumberList(recent))
+			return res.json({ items: [] });
+		// Get the address records with the specified id's
+		var sql = `SELECT * FROM addresses WHERE id in (${recent})`;
+		conn.query(sql, (err, rows) => {
+			if (err)
+				return crudRouter.handleError(err, res);
+			// Sort list of addresses according to order specified in recent_addrs
+			var items = [];
+			for (var addrId of recent.split(','))
+				items.push(rows.find(a => a.id == addrId));
+			return res.json({ items });
+		});
+	});
+}
+
+function validNumberList(list) {
+	if (!list) return false;
+	return /^[\d,]+$/.test(list);
+}
+
+//------------------------------ Data access ------------------------------
 
 function jsonDate2sqlDateTime(dt) {
 	return dt.substr(0, 10) + ' ' + dt.substr(11, 8);
