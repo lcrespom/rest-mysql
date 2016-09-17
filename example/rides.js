@@ -39,6 +39,8 @@ function getRides(req, res, dbconn) {
 	var fromDate = jsonDate2sqlDateTime(req.params.fromDate);
 	var toDate = jsonDate2sqlDateTime(req.params.toDate);
 	var sql = 'SELECT * FROM rides WHERE pickup_dt >= ? and pickup_dt <= ? ORDER BY pickup_dt';
+	//TODO provide customer name/surname
+	//	using join, e.g. SELECT rides.*, customers.name, customers.surname FROM rides left join customers on rides.customer_id = customers.id
 	dbconn.query(sql, [fromDate, toDate], (err, rows) => {
 		if (err)
 			return crudRouter.handleError(err, res);
@@ -128,7 +130,7 @@ var rideColumns = {
 
 function mapColumns(src, map) {
 	var dst = {};
-	for (fromProp of Object.keys(src)) {
+	for (var fromProp of Object.keys(src)) {
 		var toProp = map[fromProp];
 		if (!toProp) continue;
 		var fun = map['$' + fromProp];
