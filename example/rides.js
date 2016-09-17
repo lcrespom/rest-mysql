@@ -54,15 +54,23 @@ function postRide(req, res, rideTH, addrTH, custTH, url) {
 }
 
 function getRecentAddrs(customerId, res, conn) {
-	//TODO ***** prepend customer's address if not already in list
 	// Get recent addresses for customer id
-	var sql = 'SELECT recent_addrs FROM customers WHERE id=?';
+	var sql = 'SELECT id_pickup_addr, recent_addrs FROM customers WHERE id=?';
 	conn.query(sql, [customerId], (err, rows) => {
 		if (err)
 			return crudRouter.handleError(err, res);
 		var recent = rows[0].recent_addrs;
-		if (!validNumberList(recent))
-			return res.json({ items: [] });
+		var custAddrId = rows[0].id_pickup_addr;
+		// Prepend default customer's pickup address
+		if (validNumberList(recent)) {
+			if (custAddrId != null)
+				recent = custAddrId + ',' + recent;
+		}
+		else {
+			if (custAddrId == null)
+				return res.json({ items: [] });
+			recent = '' + custAddrId;
+		}
 		// Get the address records with the specified id's
 		var sql = `SELECT * FROM addresses WHERE id in (${recent})`;
 		conn.query(sql, (err, rows) => {
@@ -70,9 +78,12 @@ function getRecentAddrs(customerId, res, conn) {
 				return crudRouter.handleError(err, res);
 			// Sort list of addresses according to order specified in recent_addrs
 			var items = [];
-			for (var addrId of recent.split(','))
-				items.push(rows.find(a => a.id == addrId));
-			return res.json({ items });
+			for (var addrId of recent.split(',')) {
+				var addr = rows.find(a => a.id == addrId);
+				if (items.indexOf(addr) == -1)
+					items.push(addr);
+			}
+			res.json({ items });
 		});
 	});
 }
