@@ -18,8 +18,8 @@ function registerRoute(router, dbconn) {
 	var rideTH = db.getCrudHandler(dbconn, routeConfig.table);
 	var addrTH = db.getCrudHandler(dbconn, 'addresses');
 	var custTH = db.getCrudHandler(dbconn, 'customers');
-	router.route(url).get((req, res) => {
-		res.json({ message: 'get pending' });
+	router.route(url + '/:fromDate/:toDate').get((req, res) => {
+		getRides(req, res, dbconn);
 	});
 	router.route(url).post((req, res) => {
 		postRide(req, res, rideTH, addrTH, custTH, url);
@@ -32,6 +32,17 @@ function registerRoute(router, dbconn) {
 	});
 	router.route('/customers/recent_addrs/:id').get((req, res) => {
 		getRecentAddrs(req.params.id, res, dbconn);
+	});
+}
+
+function getRides(req, res, dbconn) {
+	var fromDate = jsonDate2sqlDateTime(req.params.fromDate);
+	var toDate = jsonDate2sqlDateTime(req.params.toDate);
+	var sql = 'SELECT * FROM rides WHERE pickup_dt >= ? and pickup_dt <= ? ORDER BY pickup_dt';
+	dbconn.query(sql, [fromDate, toDate], (err, rows) => {
+		if (err)
+			return crudRouter.handleError(err, res);
+		res.json({ items: rows });
 	});
 }
 
@@ -53,10 +64,10 @@ function postRide(req, res, rideTH, addrTH, custTH, url) {
 	});
 }
 
-function getRecentAddrs(customerId, res, conn) {
+function getRecentAddrs(customerId, res, dbconn) {
 	// Get recent addresses for customer id
 	var sql = 'SELECT id_pickup_addr, recent_addrs FROM customers WHERE id=?';
-	conn.query(sql, [customerId], (err, rows) => {
+	dbconn.query(sql, [customerId], (err, rows) => {
 		if (err)
 			return crudRouter.handleError(err, res);
 		var recent = rows[0].recent_addrs;
@@ -73,7 +84,7 @@ function getRecentAddrs(customerId, res, conn) {
 		}
 		// Get the address records with the specified id's
 		var sql = `SELECT * FROM addresses WHERE id in (${recent})`;
-		conn.query(sql, (err, rows) => {
+		dbconn.query(sql, (err, rows) => {
 			if (err)
 				return crudRouter.handleError(err, res);
 			// Sort list of addresses according to order specified in recent_addrs
@@ -88,12 +99,13 @@ function getRecentAddrs(customerId, res, conn) {
 	});
 }
 
+
+//------------------------------ Data access ------------------------------
+
 function validNumberList(list) {
 	if (!list) return false;
 	return /^[\d,]+$/.test(list);
 }
-
-//------------------------------ Data access ------------------------------
 
 function jsonDate2sqlDateTime(dt) {
 	return dt.substr(0, 10) + ' ' + dt.substr(11, 8);
