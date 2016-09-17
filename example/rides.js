@@ -41,7 +41,7 @@ function postRide(req, res, rideTH, addrTH, custTH, url) {
 		checkNewAddress(ride.toAddress, addrTH, (err2, result2) => {
 			if (err1 || err2)
 				return crudRouter.handleError(err1 ? err1 : err2, res);
-			updateRecentAddresses(ride.customerId, result1, result2, custTH);
+			updateRecentAddresses(ride, custTH);
 			var backendRide = mapColumns(ride, rideColumns);
 			rideTH.create(backendRide, (err, result) => {
 				if (err)
@@ -54,6 +54,7 @@ function postRide(req, res, rideTH, addrTH, custTH, url) {
 }
 
 function getRecentAddrs(customerId, res, conn) {
+	//TODO ***** prepend customer's address if not already in list
 	// Get recent addresses for customer id
 	var sql = 'SELECT recent_addrs FROM customers WHERE id=?';
 	conn.query(sql, [customerId], (err, rows) => {
@@ -124,18 +125,23 @@ function checkNewAddress(addr, thandler, cb) {
 	}
 	// Valid address_id: great, nothing to do
 	if (addr.id != -1)
-		return cb(null, { insertId: addr.id });
+		return cb();
 	// If address_id == -1, we need to create the address
-	thandler.create(addr, cb);
+	delete addr.id;
+	thandler.create(addr, (err, result) => {
+		if (err)
+			return cb(err, result);
+		addr.id = result.insertId;
+		cb();
+	});
 }
 
-function updateRecentAddresses(customerId, r1, r2, thandler) {
-	if (isNaN(customerId)) return;
-	if (!r1 && !r2) return;
-	var a1 = -1, a2 = -1;
-	if (r1) a1 = r1.insertId;
-	if (r2) a2 = r2.insertId;
-	thandler.byId(customerId, (err, rows) => {
+function updateRecentAddresses(ride, thandler) {
+	if (!ride || isNaN(ride.customerId)) return;
+	var id1 = ride.fromAddress.id;
+	var id2 = ride.toAddress.id;
+	if (isNaN(id1) && isNaN(id2)) return;
+	thandler.byId(ride.customerId, (err, rows) => {
 		if (rows.length != 1) return;
 		var recent_addrs = rows[0].recent_addrs;
 		var recent;
@@ -143,11 +149,11 @@ function updateRecentAddresses(customerId, r1, r2, thandler) {
 			recent = [];
 		else
 			recent = recent_addrs.split(',').map(x => +x);
-		if (a1 >= 0) recent = addRecent(recent, a1);
-		if (a2 >= 0) recent = addRecent(recent, a2);
+		if (id1 != null) recent = addRecent(recent, id1);
+		if (id2 != null) recent = addRecent(recent, id2);
 		recent.splice(RECENT_ADDR_LEN);
 		recent_addrs = recent.join(',');
-		thandler.update(customerId, { recent_addrs });
+		thandler.update(ride.customerId, { recent_addrs });
 	});
 }
 
