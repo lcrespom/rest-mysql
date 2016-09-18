@@ -44,9 +44,6 @@ function getRides(req, res, dbconn) {
 	var where = ' WHERE pickup_dt >= ? and pickup_dt <= ?';
 	var orderBy = ' ORDER BY pickup_dt';
 	var sql = select + from + join + where + orderBy;
-	//var sql = 'SELECT * FROM rides WHERE pickup_dt >= ? and pickup_dt <= ? ORDER BY pickup_dt';
-	//TODO provide customer name/surname
-	//	using join, e.g. SELECT rides.*, customers.name, customers.surname FROM rides left join customers on rides.customer_id = customers.id
 	dbconn.query({ sql, nestTables: true }, [fromDate, toDate], (err, rows) => {
 		if (err)
 			return crudRouter.handleError(err, res);
