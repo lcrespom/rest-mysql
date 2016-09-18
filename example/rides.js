@@ -36,8 +36,8 @@ function registerRoute(router, dbconn) {
 }
 
 function getRides(req, res, dbconn) {
-	var fromDate = jsonDate2sqlDateTime(req.params.fromDate);
-	var toDate = jsonDate2sqlDateTime(req.params.toDate);
+	var fromDate = new Date(req.params.fromDate);
+	var toDate = new Date(req.params.toDate);
 	var select = 'SELECT rides.*, customers.name, customers.surname';
 	var from = ' FROM rides';
 	var join = ' LEFT JOIN customers on rides.customer_id = customers.id';
@@ -113,19 +113,10 @@ function getRecentAddrs(customerId, res, dbconn) {
 
 //------------------------------ Data access ------------------------------
 
-function validNumberList(list) {
-	if (!list) return false;
-	return /^[\d,]+$/.test(list);
-}
-
-function jsonDate2sqlDateTime(dt) {
-	return dt.substr(0, 10) + ' ' + dt.substr(11, 8);
-}
-
 var rideColumnsIn = {
 	id: 'id',
 	pickupDT: 'pickup_dt',
-	$pickupDT: dt => jsonDate2sqlDateTime(dt),
+	$pickupDT: dt => new Date(dt),
 	customerId: 'customer_id',
 	state: 'state',
 	fromAddress: 'from_addr_id',
@@ -161,6 +152,11 @@ function mapColumns(src, map) {
 			dst[toProp] = fun(src[fromProp]);
 	}
 	return dst;
+}
+
+function validNumberList(list) {
+	if (!list) return false;
+	return /^[\d,]+$/.test(list);
 }
 
 function checkNewAddress(addr, thandler, cb) {

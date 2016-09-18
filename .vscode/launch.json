@@ -7,7 +7,7 @@
 			"request": "launch",
 			"program": "${workspaceRoot}/example/server.js",
 			"stopOnEntry": false,
-			"args": ["../tmclt/dist/", "customers:rides"],
+			"args": ["/Users/luis/devtools/git-repos/tmclt/dist/", "customers:rides:login"],
 			"cwd": "${workspaceRoot}",
 			"preLaunchTask": null,
 			"runtimeExecutable": null,
