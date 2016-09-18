@@ -38,12 +38,13 @@ function registerRoute(router, dbconn) {
 function getRides(req, res, dbconn) {
 	var fromDate = new Date(req.params.fromDate);
 	var toDate = new Date(req.params.toDate);
-	var select = 'SELECT rides.*, customers.name, customers.surname';
+	var select = 'SELECT rides.*, addresses.*, customers.name, customers.surname';
 	var from = ' FROM rides';
-	var join = ' LEFT JOIN customers on rides.customer_id = customers.id';
+	var join1 = ' LEFT JOIN customers ON rides.customer_id = customers.id';
+	var join2 = ' LEFT JOIN addresses ON rides.from_addr_id = addresses.id';
 	var where = ' WHERE pickup_dt >= ? and pickup_dt <= ?';
 	var orderBy = ' ORDER BY pickup_dt';
-	var sql = select + from + join + where + orderBy;
+	var sql = select + from + join1 + join2 + where + orderBy;
 	dbconn.query({ sql, nestTables: true }, [fromDate, toDate], (err, rows) => {
 		if (err)
 			return crudRouter.handleError(err, res);
@@ -51,6 +52,7 @@ function getRides(req, res, dbconn) {
 			items: rows.map(row => {
 				result = mapColumns(row.rides, rideColumnsOut);
 				result.customer = row.customers;
+				result.pickupAddr = row.addresses;
 				return result;
 			})
 		});
