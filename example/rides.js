@@ -44,7 +44,7 @@ function getRides(req, res, dbconn) {
 	dbconn.query(sql, [fromDate, toDate], (err, rows) => {
 		if (err)
 			return crudRouter.handleError(err, res);
-		res.json({ items: rows });
+		res.json({ items: rows.map(row => mapColumns(row, rideColumnsOut)) });
 	});
 }
 
@@ -55,7 +55,7 @@ function postRide(req, res, rideTH, addrTH, custTH, url) {
 			if (err1 || err2)
 				return crudRouter.handleError(err1 ? err1 : err2, res);
 			updateRecentAddresses(ride, custTH);
-			var backendRide = mapColumns(ride, rideColumns);
+			var backendRide = mapColumns(ride, rideColumnsIn);
 			rideTH.create(backendRide, (err, result) => {
 				if (err)
 					return crudRouter.handleError(err, res);
@@ -113,7 +113,7 @@ function jsonDate2sqlDateTime(dt) {
 	return dt.substr(0, 10) + ' ' + dt.substr(11, 8);
 }
 
-var rideColumns = {
+var rideColumnsIn = {
 	id: 'id',
 	pickupDT: 'pickup_dt',
 	$pickupDT: dt => jsonDate2sqlDateTime(dt),
@@ -125,6 +125,18 @@ var rideColumns = {
 	$toAddress: a => a.id,
 	amount: 'amount',
 	payType: 'payment_type',
+	comments: 'comments'
+}
+
+var rideColumnsOut = {
+	id: 'id',
+	pickup_dt: 'pickupDT',
+	customer_id: 'customerId',
+	state: 'state',
+	from_addr_id: 'fromAddress',
+	to_addr_id: 'toAddress',
+	amount: 'amount',
+	payment_type: 'payType',
 	comments: 'comments'
 }
 
