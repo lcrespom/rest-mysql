@@ -38,13 +38,25 @@ function registerRoute(router, dbconn) {
 function getRides(req, res, dbconn) {
 	var fromDate = jsonDate2sqlDateTime(req.params.fromDate);
 	var toDate = jsonDate2sqlDateTime(req.params.toDate);
-	var sql = 'SELECT * FROM rides WHERE pickup_dt >= ? and pickup_dt <= ? ORDER BY pickup_dt';
+	var select = 'SELECT rides.*, customers.name, customers.surname';
+	var from = ' FROM rides';
+	var join = ' LEFT JOIN customers on rides.customer_id = customers.id';
+	var where = ' WHERE pickup_dt >= ? and pickup_dt <= ?';
+	var orderBy = ' ORDER BY pickup_dt';
+	var sql = select + from + join + where + orderBy;
+	//var sql = 'SELECT * FROM rides WHERE pickup_dt >= ? and pickup_dt <= ? ORDER BY pickup_dt';
 	//TODO provide customer name/surname
 	//	using join, e.g. SELECT rides.*, customers.name, customers.surname FROM rides left join customers on rides.customer_id = customers.id
-	dbconn.query(sql, [fromDate, toDate], (err, rows) => {
+	dbconn.query({ sql, nestTables: true }, [fromDate, toDate], (err, rows) => {
 		if (err)
 			return crudRouter.handleError(err, res);
-		res.json({ items: rows.map(row => mapColumns(row, rideColumnsOut)) });
+		res.json({
+			items: rows.map(row => {
+				result = mapColumns(row.rides, rideColumnsOut);
+				result.customer = row.customers;
+				return result;
+			})
+		});
 	});
 }
 
