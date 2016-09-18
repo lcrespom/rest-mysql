@@ -38,7 +38,7 @@ function registerRoute(router, dbconn) {
 function getRides(req, res, dbconn) {
 	var fromDate = new Date(req.params.fromDate);
 	var toDate = new Date(req.params.toDate);
-	var select = 'SELECT rides.*, addresses.*, customers.name, customers.surname';
+	var select = 'SELECT rides.*, addresses.*, customers.name, customers.surname, customers.member';
 	var from = ' FROM rides';
 	var join1 = ' LEFT JOIN customers ON rides.customer_id = customers.id';
 	var join2 = ' LEFT JOIN addresses ON rides.from_addr_id = addresses.id';
