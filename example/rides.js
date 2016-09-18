@@ -24,8 +24,8 @@ function registerRoute(router, dbconn) {
 	router.route(url).post((req, res) => {
 		postRide(req, res, rideTH, addrTH, custTH, url);
 	});
-	router.route(url).put((req, res) => {
-		res.json({ message: 'put pending' });
+	router.route(url + '/:id').put((req, res) => {
+		putRide(req, res, rideTH, addrTH, custTH, url);
 	});
 	router.route(url).delete((req, res) => {
 		res.json({ message: 'delete pending' });
@@ -59,7 +59,7 @@ function getRides(req, res, dbconn) {
 	});
 }
 
-function postRide(req, res, rideTH, addrTH, custTH, url) {
+function preparePostPutRide(req, res, addrTH, custTH, cb) {
 	var ride = req.body;
 	checkNewAddress(ride.fromAddress, addrTH, (err1, result1) => {
 		checkNewAddress(ride.toAddress, addrTH, (err2, result2) => {
@@ -67,12 +67,32 @@ function postRide(req, res, rideTH, addrTH, custTH, url) {
 				return crudRouter.handleError(err1 ? err1 : err2, res);
 			updateRecentAddresses(ride, custTH);
 			var backendRide = mapColumns(ride, rideColumnsIn);
-			rideTH.create(backendRide, (err, result) => {
-				if (err)
-					return crudRouter.handleError(err, res);
-				var id = result.insertId;
-				res.status(201).json(crudRouter.addSelfLink({ id }, req, url, id));
-			});
+			cb(backendRide);
+		});
+	});
+}
+
+function postRide(req, res, rideTH, addrTH, custTH, url) {
+	preparePostPutRide(req, res, addrTH, custTH, backendRide => {
+		rideTH.create(backendRide, (err, result) => {
+			if (err)
+				return crudRouter.handleError(err, res);
+			var id = result.insertId;
+			res.status(201).json(crudRouter.addSelfLink({ id }, req, url, id));
+		});
+	});
+}
+
+function putRide(req, res, rideTH, addrTH, custTH, url) {
+	preparePostPutRide(req, res, addrTH, custTH, backendRide => {
+		var id = req.params.id;
+		rideTH.update(id, backendRide, (err, result) => {
+			if (err)
+				return crudRouter.handleError(err, res);
+			if (result.affectedRows > 0)
+				res.json(crudRouter.addSelfLink({ updated: true }, req, url, id));
+			else
+				crudRouter.handleNotFoundError(req, res, url, id);
 		});
 	});
 }
@@ -135,8 +155,8 @@ var rideColumnsOut = {
 	pickup_dt: 'pickupDT',
 	customer_id: 'customerId',
 	state: 'state',
-	from_addr_id: 'fromAddress',
-	to_addr_id: 'toAddress',
+	from_addr_id: 'fromAddressId',
+	to_addr_id: 'toAddressId',
 	amount: 'amount',
 	payment_type: 'payType',
 	comments: 'comments'
