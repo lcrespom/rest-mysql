@@ -1,4 +1,5 @@
 var fs = require('fs');
+var http = require('http');
 var https = require('https');
 var express = require('express');
 var compression = require('compression');
@@ -38,12 +39,16 @@ app.use(express.static(config.webPath));
 // SSL self-signed keys using this command:
 //	> openssl req -new -x509 -nodes -out server.crt -keyout server.key
 //  More info here: http://stackoverflow.com/questions/14267010/how-to-create-self-signed-ssl-certificate-for-test-purposes
-var privateKey = fs.readFileSync('example/test-keys/server.key');
-var certificate = fs.readFileSync('example/test-keys/server.crt');
-https.createServer({
-	key: privateKey,
-	cert: certificate
-}, app).listen(config.webPort);
+if (config.useHttps) {
+	options = {
+		key: fs.readFileSync('example/test-keys/server.key'),
+		cert: fs.readFileSync('example/test-keys/server.crt')
+	}
+	https.createServer(options, app).listen(config.webPort);
+}
+else {
+	http.createServer(app).listen(config.webPort);
+}
 console.log('API server ready on port ' + config.webPort);
 
 
