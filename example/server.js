@@ -4,6 +4,7 @@ var https = require('https');
 var express = require('express');
 var compression = require('compression');
 var bodyParser = require('body-parser');
+var cors = require('cors');
 
 var db = require('../src/db');
 var crudRouter = require('../src/crud-router');
@@ -26,6 +27,8 @@ rides.registerRoute(router, dbconn);
 auth.registerLogin(router, '/login', getUserData);
 // App startup
 var app = createExpressApp();
+if (config.cors)
+	app.use('/api', cors());
 // Register REST API
 app.use('/api', router);
 // Register static routes
@@ -39,7 +42,7 @@ app.use(express.static(config.webPath));
 // SSL self-signed keys using this command:
 //	> openssl req -new -x509 -nodes -out server.crt -keyout server.key
 //  More info here: http://stackoverflow.com/questions/14267010/how-to-create-self-signed-ssl-certificate-for-test-purposes
-if (config.useHttps) {
+if (config.https) {
 	options = {
 		key: fs.readFileSync('example/test-keys/server.key'),
 		cert: fs.readFileSync('example/test-keys/server.crt')

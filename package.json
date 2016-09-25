@@ -17,6 +17,7 @@
     "bcrypt": "^0.8.7",
     "body-parser": "^1.15.2",
     "compression": "^1.6.2",
+    "cors": "^2.8.1",
     "express": "^4.14.0",
     "jsonwebtoken": "^7.1.9",
     "mysql": "^2.11.1"

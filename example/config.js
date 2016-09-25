@@ -31,15 +31,16 @@ let clientRoutes = ['login', 'customers', 'rides'];
 let config = {
 	tableRoutes,
 	mySql,
-	useHttps: true,
+	https: true,
 	webPort: 443,
 	webPath: path.resolve('../ngtaxi/dist'),
 	clientRoutes,
+	cors: true,
 	NOSUDO: {
 		webPort: 8443
 	},
 	NOSSL: {
-		useHttps: false,
+		https: false,
 		webPort: 7777
 	}
 };

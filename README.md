@@ -5,8 +5,6 @@ Experimenting with generic CRUD access to MYSQL tables via REST,
 following guidelines from [this blog post](https://scotch.io/tutorials/build-a-restful-api-using-node-and-express-4).
 
 ##TODO
-- Enable CORS, see cors express package
-- Increase configurability via global config file and modes
 - Big refactor
 	- Separate generic from app-specific via npm package
 	- Implement in TypeScript, add types
