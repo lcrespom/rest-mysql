@@ -26,7 +26,7 @@ crudRouter.addRoute(router, rides.routeConfig);
 rides.registerRoute(router, dbconn);
 auth.registerLogin(router, '/login', getUserData);
 // App startup
-var app = createExpressApp();
+var app = createExpressApp(config);
 if (config.cors)
 	app.use('/api', cors());
 // Register REST API
@@ -69,11 +69,11 @@ function getUserData(userId, cb) {
 
 
 //-------------------- App setup --------------------
-function createExpressApp() {
+function createExpressApp(config) {
 	var app = express();
 	setupCompression(app);
 	setupJSON(app);
-	auth.setup(getJwtSecret());
+	auth.setup(config.jwtSecret, config.bcrypt);
 	return app;
 }
 
@@ -88,11 +88,4 @@ function setupJSON(app) {
   	app.use(bodyParser.urlencoded({ extended: true }));
   	app.use(bodyParser.json());
 	return app;
-}
-
-function getJwtSecret() {
-	//TODO change before going to production
-	return "Mxmbawlx50XOpKkUMcY2wNjoRmU06g3ComNXJfxfnyt9ESuAKSQxe8FXG" +
-		"2dgiEtWdUxbqK9hZ9sWZ4KdGwI5pRmQo0xivuMlh5G2f0ZBco2eDPEZ269Mg" +
-		"z4af93xm9Xg";
 }

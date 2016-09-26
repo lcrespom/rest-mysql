@@ -1,10 +1,20 @@
 var jwt = require('jsonwebtoken');
-var bcrypt = require('bcrypt');
+var bcrypt;
 
 var jwtSecret = null;
 
-function setup(secret) {
+function setup(secret, useBcrypt) {
 	jwtSecret = secret;
+	if (useBcrypt) {
+		 bcrypt = require('bcrypt');
+	}
+	else {
+		bcrypt = {
+			compare: function(reqPW, storedPW, cb) {
+				cb(null, true);
+			}
+		}
+	}
 }
 
 
