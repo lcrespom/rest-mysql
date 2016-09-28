@@ -7,17 +7,14 @@
 			"request": "launch",
 			"program": "${workspaceRoot}/example/server.js",
 			"stopOnEntry": false,
-			"args": ["/Users/luis/devtools/git-repos/tmclt/dist/", "customers:rides:login"],
+			"args": ["DEV"],
 			"cwd": "${workspaceRoot}",
 			"preLaunchTask": null,
 			"runtimeExecutable": null,
 			"runtimeArgs": [
 				"--nolazy"
 			],
-			"env": {
-				"NODE_ENV": "development",
-				"PORT": "8443"
-			},
+			"env": {},
 			"externalConsole": false,
 			"sourceMaps": false,
 			"outDir": null
