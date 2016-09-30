@@ -1,7 +1,8 @@
 var mysql = require('mysql');
-var mysqlConfig = require('./mysql-config.json');
-mysqlConfig.port = process.env.MYSQL_PORT || mysqlConfig.port;
-var numCustomers = process.argv[2];
+var config = require('./config').init(process.argv[2]);
+
+var mysqlConfig = config.mySql;
+var numCustomers = process.argv[3];
 if (!numCustomers || isNaN(numCustomers))
 	numCustomers = 10;
 

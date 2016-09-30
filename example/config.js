@@ -16,7 +16,14 @@ let tableRoutes = [{
 }];
 
 //-------------------- mySql server --------------------
-let mySql = {
+let mySqlProd = {
+	host: 'mysqlsvr',
+	user: 'root',
+	password: 'root',
+	database: 'taxis'
+};
+
+let mySqlDev = {
 	host: 'localhost',
 	user: 'root',
 	password: 'root',
@@ -30,7 +37,7 @@ let clientRoutes = ['login', 'customers', 'rides'];
 //-------------------- Full configuration --------------------
 let config = {
 	tableRoutes,
-	mySql,
+	mySql: mySqlProd,
 	https: true,
 	webPort: 443,
 	webPath: path.resolve('../ngtaxi/dist'),
@@ -42,13 +49,15 @@ let config = {
 	DEV: {
 		cors: true,
 		https: false,
-		webPort: 7777
+		webPort: 7777,
+		mySql: mySqlDev
 	},
 	WINDEV: {
 		cors: true,
 		https: false,
 		webPort: 7777,
-		bcrypt: false
+		bcrypt: false,
+		mySql: mySqlDev
 	}
 };
 
