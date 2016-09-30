@@ -18,7 +18,7 @@ function registerRoute(router, dbconn) {
 	var rideTH = db.getCrudHandler(dbconn, routeConfig.table);
 	var addrTH = db.getCrudHandler(dbconn, 'addresses');
 	var custTH = db.getCrudHandler(dbconn, 'customers');
-	router.route(url + '/:fromDate/:toDate').get((req, res) => {
+	router.route(url + '/:fromDate/:toDate/:stateFilter').get((req, res) => {
 		getRides(req, res, dbconn);
 	});
 	router.route(url).post((req, res) => {
@@ -38,14 +38,15 @@ function registerRoute(router, dbconn) {
 function getRides(req, res, dbconn) {
 	var fromDate = new Date(req.params.fromDate);
 	var toDate = new Date(req.params.toDate);
+	var filter = req.params.stateFilter.split(',');
 	var select = 'SELECT rides.*, addresses.*, customers.name, customers.surname, customers.member';
 	var from = ' FROM rides';
 	var join1 = ' LEFT JOIN customers ON rides.customer_id = customers.id';
 	var join2 = ' LEFT JOIN addresses ON rides.from_addr_id = addresses.id';
-	var where = ' WHERE pickup_dt >= ? and pickup_dt <= ?';
+	var where = ' WHERE pickup_dt >= ? AND pickup_dt <= ? AND state in (?)';
 	var orderBy = ' ORDER BY pickup_dt';
 	var sql = select + from + join1 + join2 + where + orderBy;
-	dbconn.query({ sql, nestTables: true }, [fromDate, toDate], (err, rows) => {
+	dbconn.query({ sql, nestTables: true }, [fromDate, toDate, filter], (err, rows) => {
 		if (err)
 			return crudRouter.handleError(err, res);
 		res.json({
