@@ -1,5 +1,5 @@
 var mysql = require('mysql');
-var config = require('./config').init(process.argv[2]);
+var config = require('../config').init(process.argv[2]);
 
 var mysqlConfig = config.mySql;
 var numCustomers = process.argv[3];
