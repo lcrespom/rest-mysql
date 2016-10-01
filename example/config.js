@@ -58,6 +58,10 @@ let config = {
 		webPort: 7777,
 		bcrypt: false,
 		mySql: mySqlDev
+	},
+	RASPI: {
+		https: false,
+		webPort: 80
 	}
 };
 
