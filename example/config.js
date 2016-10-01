@@ -18,8 +18,8 @@ let tableRoutes = [{
 //-------------------- mySql server --------------------
 let mySqlProd = {
 	host: 'mysqlsvr',
-	user: 'root',
-	password: 'root',
+	user: 'node',
+	password: 'node_pw',
 	database: 'taxis'
 };
 
