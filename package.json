@@ -19,8 +19,8 @@
     "compression": "^1.6.2",
     "cors": "^2.8.1",
     "express": "^4.14.0",
-    "forever": "^0.15.2",
     "jsonwebtoken": "^7.1.9",
-    "mysql": "^2.11.1"
+    "mysql": "^2.11.1",
+    "pm2": "^2.0.18"
   }
 }
