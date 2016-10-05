@@ -13,6 +13,11 @@ let tableRoutes = [{
 	fkUpdate: { id_pickup_addr: 'addresses' },
 	fkCreate: { id_pickup_addr: 'addresses' },
 	roles: { employee: true }
+}, {
+	url: '/drivers',
+	table: 'drivers',
+	title: 'Driver table',
+	roles: { employee: true }
 }];
 
 //-------------------- mySql server --------------------
