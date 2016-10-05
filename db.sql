@@ -140,3 +140,40 @@ ALTER TABLE `rides`
   ADD CONSTRAINT `rides_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   ADD CONSTRAINT `rides_ibfk_2` FOREIGN KEY (`from_addr_id`) REFERENCES `addresses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   ADD CONSTRAINT `rides_ibfk_3` FOREIGN KEY (`to_addr_id`) REFERENCES `addresses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `drivers`
+--
+
+CREATE TABLE `drivers` (
+  `id` int(11) NOT NULL,
+  `name` varchar(30) DEFAULT NULL,
+  `surname` varchar(50) DEFAULT NULL,
+  `number` int(11) NOT NULL,
+  `phone` varchar(30) DEFAULT NULL,
+  `comments` varchar(400) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `drivers`
+--
+ALTER TABLE `drivers`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `drivers`
+--
+ALTER TABLE `drivers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  
