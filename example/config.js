@@ -17,6 +17,7 @@ let tableRoutes = [{
 	url: '/drivers',
 	table: 'drivers',
 	title: 'Driver table',
+	orderBy: 'number',
 	roles: { employee: true }
 }];
 

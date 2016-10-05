@@ -18,8 +18,10 @@ function setup(config) {
 
 function getCrudHandler(conn, tableName) {
 	return {
-		find: (params, cb) => {
+		find: (routeConfig, cb) => {
 			var sql = `SELECT * FROM ${tableName}`;
+			if (routeConfig.orderBy)
+				sql += ' ORDER BY ' + routeConfig.orderBy;
 			conn.query(sql, cb);
 		},
 		byId: (id, cb) => {

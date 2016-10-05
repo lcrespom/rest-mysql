@@ -38,7 +38,7 @@ function addCrudRoute(router, routeConfig, dbconn) {
 	var thandler = db.getCrudHandler(dbconn, routeConfig.table);
 	//---------- Routes without id (get list, post new) ----------
 	router.route(url).get((req, res) => {
-		thandler.find(req.params, (err, rows, fields) => {
+		thandler.find(routeConfig, (err, rows, fields) => {
 			if (err) return handleError(err, res);
 			rows.forEach(row => addSelfLink(row, req, url, row.id));
 			res.json({ items: rows });
