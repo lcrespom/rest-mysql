@@ -61,7 +61,7 @@ CREATE TABLE `rides` (
   `to_addr_id` int(11) DEFAULT NULL,
   `pickup_dt` datetime NOT NULL,
   `state` int(11) NOT NULL,
-  `driver` varchar(50) DEFAULT NULL,
+  `driver` int(11) DEFAULT NULL,
   `amount` decimal(10,0) DEFAULT NULL,
   `payment_type` int(11) NOT NULL,
   `comments` varchar(500) NOT NULL
