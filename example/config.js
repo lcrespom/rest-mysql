@@ -37,7 +37,7 @@ let mySqlDev = {
 };
 
 //-------------------- Client routes to be redirected to index --------------------
-let clientRoutes = ['login', 'customers', 'rides'];
+let clientRoutes = ['login', 'customers', 'rides', 'drivers'];
 
 
 //-------------------- Full configuration --------------------
